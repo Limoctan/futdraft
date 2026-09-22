@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** completed
 
 - [ ] Add `username` column to users table (string, unique, indexed)
 - [ ] Update `CreateNewUser` action to require and store username

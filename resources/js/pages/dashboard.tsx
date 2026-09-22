@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import { dashboard } from '@/routes';
 
-export default function Dashboard() {
+export default function Dashboard({ rooms }: { rooms: any[] }) {
     return (
         <>
             <Head title="Dashboard" />
