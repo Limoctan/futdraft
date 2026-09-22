@@ -6,13 +6,6 @@
 
 **Status:** ready-for-agent
 
-- [ ] Create `rooms` table migration (id, user_id, name, date, invite_code, team_size, num_teams, price_in_cents, currency, status, draft_order, current_pick_index, draft_started_at, timestamps, soft_deletes)
-- [ ] Create `room_users` pivot table (room_id, user_id, is_admin, unique constraint)
-- [ ] Create `Room` model with relationships (belongsTo creator, belongsToMany users with is_admin pivot, hasMany players, hasMany teams)
-- [ ] Create `Currency` enum (USD, EUR, COP, ARS, MXN, CLP, BRL) with label/format methods
-- [ ] Create `RoomStatus` enum (Waiting, Full, Drafting, Completed)
-- [ ] Create `RoomController` (index, store, show, update, join)
-- [ ] Define PHP routes matching Wayfinder generated routes
 - [ ] Create dashboard page showing user's rooms with state badges
 - [ ] Create room creation form (or modal on dashboard)
 - [ ] Create room detail page with tabs (Players, Draft, Teams, Chat)
