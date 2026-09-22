@@ -34,7 +34,7 @@ export default function Profile({
                 <Heading
                     variant="small"
                     title="Profile"
-                    description="Update your name and email address"
+                    description="Update your name, username, and email address"
                 />
 
                 <Form
@@ -62,6 +62,25 @@ export default function Profile({
                                 <InputError
                                     className="mt-2"
                                     message={errors.name}
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="username">Username</Label>
+
+                                <Input
+                                    id="username"
+                                    className="mt-1 block w-full"
+                                    defaultValue={auth.user.username}
+                                    name="username"
+                                    required
+                                    autoComplete="username"
+                                    placeholder="Username"
+                                />
+
+                                <InputError
+                                    className="mt-2"
+                                    message={errors.username}
                                 />
                             </div>
 
