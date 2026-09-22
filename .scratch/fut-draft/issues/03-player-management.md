@@ -4,14 +4,14 @@
 
 **Blocked by:** 02 (Room Management).
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Create `players` table migration (id, room_id FK cascade, name, rating tinyint 1-5, is_captain boolean, captain_user_id FK nullable, timestamps)
-- [ ] Create `Player` model with relationships (belongsTo room, belongsTo captainUser nullable, belongsToMany teams via team_players, hasOne payment)
-- [ ] Create `PlayerController` (store, update, destroy)
-- [ ] Define PHP routes for player CRUD under room scope
-- [ ] Create `PlayerList` component (table with add/edit/remove actions)
-- [ ] Display current player count vs required slots
-- [ ] Implement room status transition: waiting → full when player_count == team_size × num_teams
-- [ ] Allow adding players beyond required slots (Reserve List)
-- [ ] Feature tests: add player, edit player, remove player, room transitions to full at capacity
+- [x] Create `players` table migration (id, room_id FK cascade, name, rating tinyint 1-5, is_captain boolean, captain_user_id FK nullable, timestamps)
+- [x] Create `Player` model with relationships (belongsTo room, belongsTo captainUser nullable, belongsToMany teams via team_players, hasOne payment)
+- [x] Create `PlayerController` (store, update, destroy)
+- [x] Define PHP routes for player CRUD under room scope
+- [x] Create `PlayerList` component (table with add/edit/remove actions)
+- [x] Display current player count vs required slots
+- [x] Implement room status transition: waiting → full when player_count == team_size × num_teams
+- [x] Allow adding players beyond required slots (Reserve List)
+- [x] Feature tests: add player, edit player, remove player, room transitions to full at capacity

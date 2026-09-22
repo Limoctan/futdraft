@@ -53,7 +53,11 @@ class RoomController extends Controller
     {
         $this->authorizeRoomAccess($room);
 
-        $room->load(['creator', 'users']);
+        $room->load([
+            'creator',
+            'users',
+            'players' => fn ($query) => $query->orderBy('id'),
+        ]);
 
         return Inertia::render('rooms/show', ['room' => $room]);
     }

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Room;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,6 +19,7 @@ class RoomFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => User::factory(),
             'name' => fake()->sentence(2),
             'date' => fake()->dateTimeBetween('+1 week', '+1 month'),
             'invite_code' => strtoupper(fake()->bothify('######')),

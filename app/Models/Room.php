@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RoomStatus;
 use Database\Factories\RoomFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,7 +24,7 @@ use Illuminate\Support\Str;
  * @property int $num_teams
  * @property int $price_in_cents
  * @property string $currency
- * @property string $status
+ * @property RoomStatus $status
  * @property array<string, mixed>|null $draft_order
  * @property int $current_pick_index
  * @property Carbon|null $draft_started_at
@@ -60,6 +61,7 @@ class Room extends Model
     {
         return [
             'date' => 'date',
+            'status' => RoomStatus::class,
             'draft_order' => 'array',
             'current_pick_index' => 'integer',
             'draft_started_at' => 'datetime',
@@ -135,5 +137,17 @@ class Room extends Model
     public function isFull(): bool
     {
         return $this->playerCount() >= ($this->team_size * $this->num_teams);
+    }
+
+    public function syncCapacityStatus(): void
+    {
+        $required = $this->team_size * $this->num_teams;
+        $count = $this->playerCount();
+
+        if ($this->status === RoomStatus::Waiting && $count >= $required) {
+            $this->update(['status' => RoomStatus::Full]);
+        } elseif ($this->status === RoomStatus::Full && $count < $required) {
+            $this->update(['status' => RoomStatus::Waiting]);
+        }
     }
 }

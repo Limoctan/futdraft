@@ -42,7 +42,8 @@ import {
     removeUser,
 } from "@/routes/rooms";
 import { formatCurrency } from "@/lib/utils";
-import { currencies, statusColors, teamSizes } from "@/types/types";
+import { currencies, statusColors, teamSizes, type Player } from "@/types/types";
+import { PlayerList } from "@/components/players/player-list";
 
 interface User {
     id: number;
@@ -64,6 +65,7 @@ interface Room {
     status: string;
     creator: User;
     users: User[];
+    players: Player[];
 }
 
 export default function RoomShow({ room }: { room: Room }) {
@@ -75,6 +77,7 @@ export default function RoomShow({ room }: { room: Room }) {
     const isAdmin = room.users.some(
         (u) => u.id === auth.user.id && u.pivot.is_admin,
     );
+    const isMember = room.users.some((u) => u.id === auth.user.id);
     const currentUser = room.users.find((u) => u.id === auth.user.id);
 
     const editForm = useForm({
@@ -365,17 +368,11 @@ export default function RoomShow({ room }: { room: Room }) {
                     </TabsList>
 
                     <TabsContent value="players" className="mt-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Players</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-muted-foreground">
-                                    Player management will be implemented in the
-                                    next ticket.
-                                </p>
-                            </CardContent>
-                        </Card>
+                        <PlayerList
+                            room={room}
+                            isMember={isMember}
+                            isAdmin={isAdmin}
+                        />
                     </TabsContent>
 
                     <TabsContent value="draft" className="mt-4">

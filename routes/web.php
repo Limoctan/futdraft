@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('rooms/{room}/assign-admin', [RoomController::class, 'assignAdmin'])->name('rooms.assignAdmin');
     Route::post('rooms/{room}/revoke-admin', [RoomController::class, 'revokeAdmin'])->name('rooms.revokeAdmin');
     Route::delete('rooms/{room}/users/{user}', [RoomController::class, 'removeUser'])->name('rooms.removeUser');
+    Route::post('rooms/{room}/players', [PlayerController::class, 'store'])->name('rooms.players.store');
+    Route::patch('rooms/{room}/players/{player}', [PlayerController::class, 'update'])->name('rooms.players.update')->scopeBindings();
+    Route::delete('rooms/{room}/players/{player}', [PlayerController::class, 'destroy'])->name('rooms.players.destroy')->scopeBindings();
 });
 
 require __DIR__.'/settings.php';
