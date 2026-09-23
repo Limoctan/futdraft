@@ -42,8 +42,15 @@ import {
     removeUser,
 } from "@/routes/rooms";
 import { formatCurrency } from "@/lib/utils";
-import { currencies, statusColors, teamSizes, type Player } from "@/types/types";
+import {
+    currencies,
+    statusColors,
+    teamSizes,
+    type Player,
+    type Team,
+} from "@/types/types";
 import { PlayerList } from "@/components/players/player-list";
+import { CaptainAssignment } from "@/components/teams/captain-assignment";
 
 interface User {
     id: number;
@@ -66,6 +73,7 @@ interface Room {
     creator: User;
     users: User[];
     players: Player[];
+    teams: Team[];
 }
 
 export default function RoomShow({ room }: { room: Room }) {
@@ -390,17 +398,17 @@ export default function RoomShow({ room }: { room: Room }) {
                     </TabsContent>
 
                     <TabsContent value="teams" className="mt-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Teams</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-muted-foreground">
-                                    Team management will be implemented in a
-                                    future ticket.
-                                </p>
-                            </CardContent>
-                        </Card>
+                        <CaptainAssignment
+                            room={{
+                                id: room.id,
+                                status: room.status,
+                                num_teams: room.num_teams,
+                                users: room.users,
+                                players: room.players,
+                                teams: room.teams ?? [],
+                            }}
+                            isAdmin={isAdmin}
+                        />
                     </TabsContent>
 
                     <TabsContent value="chat" className="mt-4">

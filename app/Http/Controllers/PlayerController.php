@@ -57,6 +57,10 @@ class PlayerController extends Controller
         $this->authorizeModifiable($room);
         $this->authorizePlayerInRoom($room, $player);
 
+        if ($player->is_captain) {
+            abort(403, 'A captain self-pick cannot be removed. Reassign the captain first.');
+        }
+
         $player->delete();
 
         $room->syncCapacityStatus();

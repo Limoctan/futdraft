@@ -32,3 +32,31 @@ export interface Player {
     created_at?: string;
     updated_at?: string;
 }
+
+export interface TeamUser {
+    id: number;
+    name: string;
+    username: string;
+    email: string;
+}
+
+export interface TeamPlayer extends Player {
+    pivot?: {
+        team_id: number;
+        player_id: number;
+        pick_number: number;
+    };
+}
+
+export interface Team {
+    id: number;
+    room_id: number;
+    captain_user_id: number;
+    name: string | null;
+    color: string;
+    pick_order: number;
+    captain: TeamUser;
+    players: TeamPlayer[];
+    created_at?: string;
+    updated_at?: string;
+}

@@ -30,6 +30,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Collection<int, Payment> $payments
+ * @property-read Collection<int, Team> $teams
  */
 #[Fillable(['name', 'username', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
@@ -58,5 +59,13 @@ class User extends Authenticatable implements PasskeyUser
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class, 'marked_by_user_id');
+    }
+
+    /**
+     * @return HasMany<Team, $this>
+     */
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class, 'captain_user_id');
     }
 }

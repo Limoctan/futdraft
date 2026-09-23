@@ -4,13 +4,13 @@
 
 **Blocked by:** 03 (Player Management), 02 (Room Management).
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Create `teams` table migration (id, room_id FK cascade, captain_user_id FK, name nullable, color string, pick_order int, timestamps)
-- [ ] Create `team_players` pivot table (team_id, player_id, pick_number int)
-- [ ] Create `Team` model with relationships (belongsTo room, belongsTo captain User, belongsToMany players via team_players)
-- [ ] Add `assignCaptains` action to `RoomController`
-- [ ] Implement captain assignment UI (select users for each team)
-- [ ] Implement self-pick assignment (admin assigns a player to each captain)
-- [ ] Validate: all captains must be assigned before draft can start
-- [ ] Feature tests: assign captains, assign self-picks, cannot start draft without all captains
+- [x] Create `teams` table migration (id, room_id FK cascade, captain_user_id FK, name nullable, color string, pick_order int, timestamps)
+- [x] Create `team_players` pivot table (team_id, player_id, pick_number int)
+- [x] Create `Team` model with relationships (belongsTo room, belongsTo captain User, belongsToMany players via team_players)
+- [x] Add `assignCaptains` action to `RoomController`
+- [x] Implement captain assignment UI (select users for each team)
+- [x] Implement self-pick assignment (admin assigns a player to each captain)
+- [x] Validate: all captains must be assigned before draft can start
+- [x] Feature tests: assign captains, assign self-picks, cannot start draft without all captains

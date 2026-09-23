@@ -15,6 +15,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('rooms/{room}/assign-admin', [RoomController::class, 'assignAdmin'])->name('rooms.assignAdmin');
     Route::post('rooms/{room}/revoke-admin', [RoomController::class, 'revokeAdmin'])->name('rooms.revokeAdmin');
     Route::delete('rooms/{room}/users/{user}', [RoomController::class, 'removeUser'])->name('rooms.removeUser');
+    Route::post('rooms/{room}/assign-captains', [RoomController::class, 'assignCaptains'])->name('rooms.assignCaptains');
+    Route::post('rooms/{room}/start-draft', [RoomController::class, 'startDraft'])->name('rooms.startDraft');
     Route::post('rooms/{room}/players', [PlayerController::class, 'store'])->name('rooms.players.store');
     Route::patch('rooms/{room}/players/{player}', [PlayerController::class, 'update'])->name('rooms.players.update')->scopeBindings();
     Route::delete('rooms/{room}/players/{player}', [PlayerController::class, 'destroy'])->name('rooms.players.destroy')->scopeBindings();

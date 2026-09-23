@@ -139,6 +139,11 @@ class Room extends Model
         return $this->playerCount() >= ($this->team_size * $this->num_teams);
     }
 
+    public function hasAllCaptains(): bool
+    {
+        return $this->teams()->count() === $this->num_teams;
+    }
+
     public function syncCapacityStatus(): void
     {
         $required = $this->team_size * $this->num_teams;

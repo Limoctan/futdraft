@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Enums\Currency;
 use App\Enums\RoomStatus;
+use App\Models\Player;
 use App\Models\Room;
+use App\Models\Team;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -57,6 +61,7 @@ class RoomController extends Controller
             'creator',
             'users',
             'players' => fn ($query) => $query->orderBy('id')->with('payment'),
+            'teams' => fn ($query) => $query->orderBy('pick_order')->with(['captain', 'players']),
         ]);
 
         return Inertia::render('rooms/show', ['room' => $room]);
@@ -132,6 +137,129 @@ class RoomController extends Controller
         $room->users()->detach($validated['user_id']);
 
         return redirect()->route('rooms.show', $room);
+    }
+
+    public function assignCaptains(Request $request, Room $room): RedirectResponse
+    {
+        $this->authorizeAdmin($room);
+
+        if (in_array($room->status, [RoomStatus::Drafting, RoomStatus::Completed], true)) {
+            abort(403, 'Captains cannot be changed in this room state.');
+        }
+
+        $validated = $request->validate([
+            'captains' => ['required', 'array', "size:{$room->num_teams}"],
+            'captains.*.user_id' => ['required', 'integer', 'exists:users,id'],
+            'captains.*.player_id' => ['required', 'integer', 'exists:players,id'],
+        ]);
+
+        $this->validateCaptainAssignments($room, $validated['captains']);
+
+        DB::transaction(function () use ($room, $validated) {
+            foreach ($validated['captains'] as $index => $assignment) {
+                $team = $room->teams()->updateOrCreate(
+                    ['pick_order' => $index + 1],
+                    ['captain_user_id' => $assignment['user_id']]
+                );
+
+                $this->assignSelfPick($room, $team, (int) $assignment['player_id'], (int) $assignment['user_id']);
+            }
+        });
+
+        return redirect()->route('rooms.show', $room);
+    }
+
+    public function startDraft(Request $request, Room $room): RedirectResponse
+    {
+        $this->authorizeAdmin($room);
+
+        if ($room->status !== RoomStatus::Full || ! $room->isFull()) {
+            throw ValidationException::withMessages([
+                'room' => 'The room must be full before the draft can start.',
+            ]);
+        }
+
+        if (! $room->hasAllCaptains()) {
+            throw ValidationException::withMessages([
+                'captains' => 'All captains must be assigned before the draft can start.',
+            ]);
+        }
+
+        if ($room->teams()->doesntHave('players')->exists()) {
+            throw ValidationException::withMessages([
+                'captains' => 'Every captain must have a self-pick before the draft can start.',
+            ]);
+        }
+
+        $room->update([
+            'status' => RoomStatus::Drafting,
+            'draft_started_at' => now(),
+        ]);
+
+        return redirect()->route('rooms.show', $room);
+    }
+
+    /**
+     * @param  array<int, array{user_id: int|string, player_id: int|string}>  $captains
+     */
+    private function validateCaptainAssignments(Room $room, array $captains): void
+    {
+        $userIds = array_map(fn ($assignment) => (int) $assignment['user_id'], $captains);
+        $playerIds = array_map(fn ($assignment) => (int) $assignment['player_id'], $captains);
+
+        if (count($userIds) !== count(array_unique($userIds))) {
+            throw ValidationException::withMessages([
+                'captains' => 'Each captain can only be assigned once.',
+            ]);
+        }
+
+        if (count($playerIds) !== count(array_unique($playerIds))) {
+            throw ValidationException::withMessages([
+                'captains' => 'Each self-pick player can only be assigned once.',
+            ]);
+        }
+
+        $memberIds = $room->users()->pluck('users.id')->map(fn ($id) => (int) $id)->all();
+
+        foreach ($userIds as $index => $userId) {
+            if (! in_array($userId, $memberIds, true)) {
+                throw ValidationException::withMessages([
+                    "captains.{$index}.user_id" => 'The selected user is not a member of this room.',
+                ]);
+            }
+        }
+
+        $roomPlayerIds = $room->players()->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        foreach ($playerIds as $index => $playerId) {
+            if (! in_array($playerId, $roomPlayerIds, true)) {
+                throw ValidationException::withMessages([
+                    "captains.{$index}.player_id" => 'The selected player does not belong to this room.',
+                ]);
+            }
+        }
+    }
+
+    private function assignSelfPick(Room $room, Team $team, int $playerId, int $captainUserId): void
+    {
+        $player = Player::where('room_id', $room->id)->findOrFail($playerId);
+
+        $currentSelfPick = $team->players()->wherePivot('pick_number', 1)->first();
+
+        if ($currentSelfPick && $currentSelfPick->id !== $player->id) {
+            $team->players()->detach($currentSelfPick->id);
+            $currentSelfPick->update([
+                'is_captain' => false,
+                'captain_user_id' => null,
+            ]);
+        }
+
+        $player->teams()->detach();
+        $team->players()->attach($player->id, ['pick_number' => 1]);
+        $player->update([
+            'is_captain' => true,
+            'captain_user_id' => $captainUserId,
+        ]);
     }
 
     private function authorizeRoomAccess(Room $room): void
