@@ -18,6 +18,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('rooms/{room}/players', [PlayerController::class, 'store'])->name('rooms.players.store');
     Route::patch('rooms/{room}/players/{player}', [PlayerController::class, 'update'])->name('rooms.players.update')->scopeBindings();
     Route::delete('rooms/{room}/players/{player}', [PlayerController::class, 'destroy'])->name('rooms.players.destroy')->scopeBindings();
+    Route::post('rooms/{room}/players/{player}/pay', [PlayerController::class, 'markPaid'])->name('rooms.players.markPaid')->scopeBindings();
+    Route::get('rooms/{room}/players/{player}/payment', [PlayerController::class, 'paymentImage'])->name('rooms.players.paymentImage')->scopeBindings();
 });
 
 require __DIR__.'/settings.php';

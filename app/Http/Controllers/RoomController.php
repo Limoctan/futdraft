@@ -56,7 +56,7 @@ class RoomController extends Controller
         $room->load([
             'creator',
             'users',
-            'players' => fn ($query) => $query->orderBy('id'),
+            'players' => fn ($query) => $query->orderBy('id')->with('payment'),
         ]);
 
         return Inertia::render('rooms/show', ['room' => $room]);

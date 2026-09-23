@@ -8,6 +8,8 @@ use App\Models\Room;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 
 class PlayerController extends Controller
 {
@@ -60,6 +62,58 @@ class PlayerController extends Controller
         $room->syncCapacityStatus();
 
         return redirect()->route('rooms.show', $room);
+    }
+
+    public function markPaid(Request $request, Room $room, Player $player): RedirectResponse
+    {
+        $this->authorizeRoomMember($room);
+        $this->authorizePlayerInRoom($room, $player);
+
+        $isAdmin = $room->isAdmin(Auth::user());
+
+        $request->validate([
+            'reference_image' => [
+                $isAdmin ? 'nullable' : 'required',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:5120',
+            ],
+        ]);
+
+        $paymentAttributes = [
+            'marked_by_user_id' => Auth::id(),
+            'paid_at' => now(),
+        ];
+
+        if ($request->hasFile('reference_image')) {
+            $image = $request->file('reference_image');
+            $extension = $image->guessExtension() ?? 'bin';
+
+            $paymentAttributes['reference_image_path'] = $image->storeAs(
+                "payments/{$room->id}",
+                "{$player->id}_".now()->timestamp.'.'.$extension,
+                'payments',
+            );
+        }
+
+        $player->payment()->updateOrCreate([], $paymentAttributes);
+
+        return redirect()->route('rooms.show', $room);
+    }
+
+    public function paymentImage(Room $room, Player $player): Response
+    {
+        $this->authorizeRoomMember($room);
+        $this->authorizePlayerInRoom($room, $player);
+
+        $path = $player->payment?->reference_image_path;
+
+        abort_if($path === null, 404);
+
+        abort_unless(Storage::disk('payments')->exists($path), 404);
+
+        return Storage::disk('payments')->response($path);
     }
 
     private function authorizeRoomMember(Room $room): void
