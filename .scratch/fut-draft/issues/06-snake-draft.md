@@ -4,17 +4,17 @@
 
 **Blocked by:** 05 (Captain Assignment).
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Create `draft_picks` table migration (id, room_id, team_id, player_id, pick_number, picked_by_user_id, auto_picked boolean, timestamps)
-- [ ] Create `DraftPick` model with relationships (belongsTo room, belongsTo team, belongsTo player, belongsTo pickedByUser)
-- [ ] Create `DraftController` (pick, autoPick, current)
-- [ ] Implement snake draft algorithm: randomized order, reversed each round
-- [ ] Implement 2-minute timer per pick with auto-pick fallback
-- [ ] Auto-pick selects highest-rated available player
-- [ ] Self-picks automatically assigned as first picks when draft starts
-- [ ] Create `DraftBoard` component (turn indicator, available players, draft history)
-- [ ] Real-time draft updates (all users see picks as they happen)
-- [ ] Admin can cancel draft (returns room to "waiting" state)
-- [ ] Draft ends when all team slots are filled
-- [ ] Feature tests: start draft, pick player (correct turn), pick player (wrong turn rejected), auto-pick on timeout, cancel draft, snake order correctness
+- [x] Create `draft_picks` table migration (id, room_id, team_id, player_id, pick_number, picked_by_user_id, auto_picked boolean, timestamps)
+- [x] Create `DraftPick` model with relationships (belongsTo room, belongsTo team, belongsTo player, belongsTo pickedByUser)
+- [x] Create `DraftController` (pick, autoPick, current)
+- [x] Implement snake draft algorithm: randomized order, reversed each round
+- [x] Implement 2-minute timer per pick with auto-pick fallback
+- [x] Auto-pick selects highest-rated available player
+- [x] Self-picks automatically assigned as first picks when draft starts
+- [x] Create `DraftBoard` component (turn indicator, available players, draft history)
+- [x] Real-time draft updates (all users see picks as they happen)
+- [x] Admin can cancel draft (returns room to "waiting" state)
+- [x] Draft ends when all team slots are filled
+- [x] Feature tests: start draft, pick player (correct turn), pick player (wrong turn rejected), auto-pick on timeout, cancel draft, snake order correctness

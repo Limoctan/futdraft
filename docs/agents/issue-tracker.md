@@ -26,10 +26,12 @@ This project uses a **local markdown** issue tracker. Issues live as files under
 [Description of the issue or feature request]
 
 ## Acceptance Criteria
+
 - [ ] Criterion 1
 - [ ] Criterion 2
 
 ## Status
+
 - Role: needs-triage
 ```
 

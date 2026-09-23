@@ -1,6 +1,7 @@
 # FUT Draft — Full Platform Spec
 
 ## Status
+
 - Role: ready-for-agent
 
 ## Problem Statement
@@ -204,11 +205,13 @@ All routes under `auth` + `verified` middleware. Room-scoped routes use route mo
 ### Frontend Architecture
 
 **Pages:**
+
 - `dashboard.tsx` — updated: list rooms, join by code, create room
 - `rooms/show.tsx` — new: main room page with tabs (Players, Draft, Teams, Chat)
 - `rooms/create.tsx` — new: create room form (or modal on dashboard)
 
 **Components:**
+
 - `PlayerList` — table with add/edit/remove/pay actions
 - `DraftBoard` — live draft view with turn indicator, available players, draft history
 - `TeamView` — team cards with color picker
@@ -217,6 +220,7 @@ All routes under `auth` + `verified` middleware. Room-scoped routes use route mo
 - `TeamImageCard` — html2canvas target for shareable image generation
 
 **Real-time:**
+
 - `useEchoPresence` hook from `@laravel/echo-react` in room page
 - Listens on `room.{id}` presence channel
 - Updates UI via Inertia `router.reload()` or local state mutations

@@ -1,24 +1,24 @@
-import { useForm } from "@inertiajs/react";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useForm } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
-import { Crown, Save, UserCheck } from "lucide-react";
-import { assignCaptains } from "@/routes/rooms";
-import type { Player, Team, TeamUser } from "@/types/types";
+} from '@/components/ui/select';
+import { Crown, Save, UserCheck } from 'lucide-react';
+import { assignCaptains } from '@/routes/rooms';
+import type { Player, Team, TeamUser } from '@/types/types';
 
 interface CaptainAssignmentProps {
     room: {
@@ -37,7 +37,7 @@ interface CaptainSlot {
     player_id: string;
 }
 
-const EMPTY_SLOT: CaptainSlot = { user_id: "", player_id: "" };
+const EMPTY_SLOT: CaptainSlot = { user_id: '', player_id: '' };
 
 function TeamSummaryCard({ team }: { team: Team }) {
     return (
@@ -56,13 +56,13 @@ function TeamSummaryCard({ team }: { team: Team }) {
                 <CardDescription>
                     {team.captain?.username ??
                         team.captain?.name ??
-                        "No captain"}
+                        'No captain'}
                 </CardDescription>
             </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-                Self-pick:{" "}
-                <span className="font-medium text-foreground">
-                    {team.players[0]?.name ?? "Not assigned"}
+            <CardContent className="text-muted-foreground text-sm">
+                Self-pick:{' '}
+                <span className="text-foreground font-medium">
+                    {team.players[0]?.name ?? 'Not assigned'}
                 </span>
             </CardContent>
         </Card>
@@ -70,12 +70,13 @@ function TeamSummaryCard({ team }: { team: Team }) {
 }
 
 export function CaptainAssignment({ room, isAdmin }: CaptainAssignmentProps) {
-    const isLocked =
-        room.status === "drafting" || room.status === "completed";
+    const isLocked = room.status === 'drafting' || room.status === 'completed';
     const canEdit = isAdmin && !isLocked;
     const allAssigned =
         room.teams.length === room.num_teams &&
-        room.teams.every((team) => team.captain_user_id && team.players.length > 0);
+        room.teams.every(
+            (team) => team.captain_user_id && team.players.length > 0,
+        );
 
     const initialSlots: CaptainSlot[] = Array.from(
         { length: room.num_teams },
@@ -85,8 +86,8 @@ export function CaptainAssignment({ room, isAdmin }: CaptainAssignmentProps) {
                 return EMPTY_SLOT;
             }
             return {
-                user_id: String(team.captain_user_id ?? ""),
-                player_id: String(team.players[0]?.id ?? ""),
+                user_id: String(team.captain_user_id ?? ''),
+                player_id: String(team.players[0]?.id ?? ''),
             };
         },
     );
@@ -104,14 +105,16 @@ export function CaptainAssignment({ room, isAdmin }: CaptainAssignmentProps) {
 
     function updateSlot(index: number, patch: Partial<CaptainSlot>) {
         setSlots((current) =>
-            current.map((slot, i) => (i === index ? { ...slot, ...patch } : slot)),
+            current.map((slot, i) =>
+                i === index ? { ...slot, ...patch } : slot,
+            ),
         );
     }
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         form.setData(
-            "captains",
+            'captains',
             slots.map((slot) => ({
                 user_id: slot.user_id,
                 player_id: slot.player_id,
@@ -155,18 +158,19 @@ export function CaptainAssignment({ room, isAdmin }: CaptainAssignmentProps) {
                         Assign Captains
                     </CardTitle>
                     <CardDescription>
-                        Select a captain (room member) and their self-pick player
-                        for each team. Self-picks count as the first pick.
+                        Select a captain (room member) and their self-pick
+                        player for each team. Self-picks count as the first
+                        pick.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {slots.map((slot, index) => {
-                        const rowError = (form.errors as Record<string, string>)[
-                            `captains.${index}.user_id`
-                        ];
-                        const playerError = (form.errors as Record<string, string>)[
-                            `captains.${index}.player_id`
-                        ];
+                        const rowError = (
+                            form.errors as Record<string, string>
+                        )[`captains.${index}.user_id`];
+                        const playerError = (
+                            form.errors as Record<string, string>
+                        )[`captains.${index}.player_id`];
 
                         return (
                             <div
@@ -178,7 +182,9 @@ export function CaptainAssignment({ room, isAdmin }: CaptainAssignmentProps) {
                                     <Select
                                         value={slot.user_id || undefined}
                                         onValueChange={(value) =>
-                                            updateSlot(index, { user_id: value })
+                                            updateSlot(index, {
+                                                user_id: value,
+                                            })
                                         }
                                     >
                                         <SelectTrigger className="mt-1">
@@ -196,7 +202,7 @@ export function CaptainAssignment({ room, isAdmin }: CaptainAssignmentProps) {
                                         </SelectContent>
                                     </Select>
                                     {rowError && (
-                                        <p className="mt-1 text-sm text-destructive">
+                                        <p className="text-destructive mt-1 text-sm">
                                             {rowError}
                                         </p>
                                     )}
@@ -206,7 +212,9 @@ export function CaptainAssignment({ room, isAdmin }: CaptainAssignmentProps) {
                                     <Select
                                         value={slot.player_id || undefined}
                                         onValueChange={(value) =>
-                                            updateSlot(index, { player_id: value })
+                                            updateSlot(index, {
+                                                player_id: value,
+                                            })
                                         }
                                     >
                                         <SelectTrigger className="mt-1">
@@ -218,13 +226,14 @@ export function CaptainAssignment({ room, isAdmin }: CaptainAssignmentProps) {
                                                     key={player.id}
                                                     value={String(player.id)}
                                                 >
-                                                    {player.name} (★{player.rating})
+                                                    {player.name} (★
+                                                    {player.rating})
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                     {playerError && (
-                                        <p className="mt-1 text-sm text-destructive">
+                                        <p className="text-destructive mt-1 text-sm">
                                             {playerError}
                                         </p>
                                     )}
@@ -235,22 +244,22 @@ export function CaptainAssignment({ room, isAdmin }: CaptainAssignmentProps) {
 
                     {(form.errors.captains ||
                         (form.errors as Record<string, string>).room) && (
-                        <p className="text-sm text-destructive">
+                        <p className="text-destructive text-sm">
                             {form.errors.captains ??
                                 (form.errors as Record<string, string>).room}
                         </p>
                     )}
 
                     <div className="flex items-center justify-between">
-                        <p className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <p className="text-muted-foreground flex items-center gap-1 text-sm">
                             <UserCheck className="size-4" />
                             {allAssigned
-                                ? "All captains assigned"
-                                : "All captains must be assigned before the draft can start"}
+                                ? 'All captains assigned'
+                                : 'All captains must be assigned before the draft can start'}
                         </p>
                         <Button type="submit" disabled={form.processing}>
                             <Save className="mr-2 size-4" />
-                            {form.processing ? "Saving..." : "Save Captains"}
+                            {form.processing ? 'Saving...' : 'Save Captains'}
                         </Button>
                     </div>
                 </CardContent>

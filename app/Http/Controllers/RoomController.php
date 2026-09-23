@@ -62,6 +62,7 @@ class RoomController extends Controller
             'users',
             'players' => fn ($query) => $query->orderBy('id')->with('payment'),
             'teams' => fn ($query) => $query->orderBy('pick_order')->with(['captain', 'players']),
+            'draftPicks' => fn ($query) => $query->orderBy('pick_number')->with(['player', 'team.captain']),
         ]);
 
         return Inertia::render('rooms/show', ['room' => $room]);
@@ -173,9 +174,15 @@ class RoomController extends Controller
     {
         $this->authorizeAdmin($room);
 
-        if ($room->status !== RoomStatus::Full || ! $room->isFull()) {
+        if (! $room->isFull()) {
             throw ValidationException::withMessages([
                 'room' => 'The room must be full before the draft can start.',
+            ]);
+        }
+
+        if (in_array($room->status, [RoomStatus::Drafting, RoomStatus::Completed], true)) {
+            throw ValidationException::withMessages([
+                'room' => 'The draft has already started.',
             ]);
         }
 
@@ -191,12 +198,80 @@ class RoomController extends Controller
             ]);
         }
 
-        $room->update([
-            'status' => RoomStatus::Drafting,
-            'draft_started_at' => now(),
-        ]);
+        DB::transaction(function () use ($room) {
+            $draftOrder = $room->teams()
+                ->get()
+                ->shuffle()
+                ->pluck('id')
+                ->values()
+                ->all();
+
+            $this->recordSelfPicks($room, $draftOrder);
+
+            $room->update([
+                'status' => RoomStatus::Drafting,
+                'draft_started_at' => now(),
+                'draft_order' => $draftOrder,
+                'current_pick_index' => 0,
+            ]);
+        });
 
         return redirect()->route('rooms.show', $room);
+    }
+
+    public function cancelDraft(Request $request, Room $room): RedirectResponse
+    {
+        $this->authorizeAdmin($room);
+
+        if ($room->status !== RoomStatus::Drafting) {
+            throw ValidationException::withMessages([
+                'room' => 'There is no active draft to cancel.',
+            ]);
+        }
+
+        DB::transaction(function () use ($room) {
+            $room->draftPicks()->delete();
+
+            foreach ($room->teams as $team) {
+                $team->players()->wherePivot('pick_number', '>', 1)->detach();
+            }
+
+            $room->update([
+                'status' => RoomStatus::Waiting,
+                'draft_order' => null,
+                'current_pick_index' => 0,
+                'draft_started_at' => null,
+            ]);
+        });
+
+        return redirect()->route('rooms.show', $room);
+    }
+
+    /**
+     * @param  array<int, int>  $draftOrder
+     */
+    private function recordSelfPicks(Room $room, array $draftOrder): void
+    {
+        $pickNumber = 1;
+
+        foreach ($draftOrder as $teamId) {
+            $team = $room->teams()->findOrFail($teamId);
+            $selfPick = $team->players()->wherePivot('pick_number', 1)->first();
+
+            if ($selfPick === null) {
+                continue;
+            }
+
+            $room->draftPicks()->create([
+                'team_id' => $team->id,
+                'player_id' => $selfPick->id,
+                'pick_number' => $pickNumber,
+                'picked_by_user_id' => $team->captain_user_id,
+                'auto_picked' => true,
+            ]);
+
+            $pickNumber++;
+        }
     }
 
     /**

@@ -1,17 +1,17 @@
-import { Head, Link, router, useForm, usePage } from "@inertiajs/react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Head, Link, useForm } from '@inertiajs/react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
     Dialog,
     DialogContent,
@@ -20,13 +20,13 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { Plus, Users, Calendar, DollarSign, Copy, Check } from "lucide-react";
-import { dashboard } from "@/routes";
-import { store, join } from "@/routes/rooms";
-import { show } from "@/routes/rooms";
-import { formatCurrency } from "@/lib/utils";
-import { currencies, statusColors, teamSizes } from "@/types/types";
+} from '@/components/ui/dialog';
+import { Plus, Users, Calendar, DollarSign, Copy, Check } from 'lucide-react';
+import { dashboard } from '@/routes';
+import { store, join } from '@/routes/rooms';
+import { show } from '@/routes/rooms';
+import { formatCurrency } from '@/lib/utils';
+import { currencies, statusColors, teamSizes } from '@/types/types';
 
 interface Room {
     id: number;
@@ -48,15 +48,15 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
-        name: "",
-        date: "",
-        team_size: "5",
-        num_teams: "2",
-        price_in_cents: "",
-        currency: "USD",
+        name: '',
+        date: '',
+        team_size: '5',
+        num_teams: '2',
+        price_in_cents: '',
+        currency: 'USD',
     });
 
-    const joinForm = useForm({ invite_code: "" });
+    const joinForm = useForm({ invite_code: '' });
 
     function handleCreate(e: React.FormEvent) {
         e.preventDefault();
@@ -79,7 +79,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
     }
 
     function copyCode(code: string) {
-        navigator.clipboard.writeText(code);
+        void navigator.clipboard.writeText(code);
         setCopiedCode(code);
         setTimeout(() => setCopiedCode(null), 2000);
     }
@@ -116,7 +116,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                             value={joinForm.data.invite_code}
                                             onChange={(e) =>
                                                 joinForm.setData(
-                                                    "invite_code",
+                                                    'invite_code',
                                                     e.target.value.toUpperCase(),
                                                 )
                                             }
@@ -125,7 +125,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                             className="mt-1 font-mono text-lg tracking-widest uppercase"
                                         />
                                         {joinForm.errors.invite_code && (
-                                            <p className="mt-1 text-sm text-destructive">
+                                            <p className="text-destructive mt-1 text-sm">
                                                 {joinForm.errors.invite_code}
                                             </p>
                                         )}
@@ -136,8 +136,8 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                             disabled={joinForm.processing}
                                         >
                                             {joinForm.processing
-                                                ? "Joining..."
-                                                : "Join Room"}
+                                                ? 'Joining...'
+                                                : 'Join Room'}
                                         </Button>
                                     </DialogFooter>
                                 </form>
@@ -170,7 +170,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                 value={data.name}
                                                 onChange={(e) =>
                                                     setData(
-                                                        "name",
+                                                        'name',
                                                         e.target.value,
                                                     )
                                                 }
@@ -178,7 +178,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                 className="mt-1"
                                             />
                                             {errors.name && (
-                                                <p className="mt-1 text-sm text-destructive">
+                                                <p className="text-destructive mt-1 text-sm">
                                                     {errors.name}
                                                 </p>
                                             )}
@@ -191,14 +191,14 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                 value={data.date}
                                                 onChange={(e) =>
                                                     setData(
-                                                        "date",
+                                                        'date',
                                                         e.target.value,
                                                     )
                                                 }
                                                 className="mt-1"
                                             />
                                             {errors.date && (
-                                                <p className="mt-1 text-sm text-destructive">
+                                                <p className="text-destructive mt-1 text-sm">
                                                     {errors.date}
                                                 </p>
                                             )}
@@ -209,7 +209,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                 <Select
                                                     value={data.team_size}
                                                     onValueChange={(v) =>
-                                                        setData("team_size", v)
+                                                        setData('team_size', v)
                                                     }
                                                 >
                                                     <SelectTrigger className="mt-1">
@@ -224,7 +224,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                                         size,
                                                                     )}
                                                                 >
-                                                                    {size}{" "}
+                                                                    {size}{' '}
                                                                     players
                                                                 </SelectItem>
                                                             ),
@@ -232,7 +232,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                     </SelectContent>
                                                 </Select>
                                                 {errors.team_size && (
-                                                    <p className="mt-1 text-sm text-destructive">
+                                                    <p className="text-destructive mt-1 text-sm">
                                                         {errors.team_size}
                                                     </p>
                                                 )}
@@ -249,14 +249,14 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                     value={data.num_teams}
                                                     onChange={(e) =>
                                                         setData(
-                                                            "num_teams",
+                                                            'num_teams',
                                                             e.target.value,
                                                         )
                                                     }
                                                     className="mt-1"
                                                 />
                                                 {errors.num_teams && (
-                                                    <p className="mt-1 text-sm text-destructive">
+                                                    <p className="text-destructive mt-1 text-sm">
                                                         {errors.num_teams}
                                                     </p>
                                                 )}
@@ -274,7 +274,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                     value={data.price_in_cents}
                                                     onChange={(e) =>
                                                         setData(
-                                                            "price_in_cents",
+                                                            'price_in_cents',
                                                             e.target.value,
                                                         )
                                                     }
@@ -282,7 +282,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                     className="mt-1"
                                                 />
                                                 {errors.price_in_cents && (
-                                                    <p className="mt-1 text-sm text-destructive">
+                                                    <p className="text-destructive mt-1 text-sm">
                                                         {errors.price_in_cents}
                                                     </p>
                                                 )}
@@ -292,7 +292,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                 <Select
                                                     value={data.currency}
                                                     onValueChange={(v) =>
-                                                        setData("currency", v)
+                                                        setData('currency', v)
                                                     }
                                                 >
                                                     <SelectTrigger className="mt-1">
@@ -312,7 +312,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                     </SelectContent>
                                                 </Select>
                                                 {errors.currency && (
-                                                    <p className="mt-1 text-sm text-destructive">
+                                                    <p className="text-destructive mt-1 text-sm">
                                                         {errors.currency}
                                                     </p>
                                                 )}
@@ -325,8 +325,8 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                             disabled={processing}
                                         >
                                             {processing
-                                                ? "Creating..."
-                                                : "Create Room"}
+                                                ? 'Creating...'
+                                                : 'Create Room'}
                                         </Button>
                                     </DialogFooter>
                                 </form>
@@ -338,11 +338,11 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                 {rooms.length === 0 ? (
                     <Card>
                         <CardContent className="flex flex-col items-center justify-center py-12">
-                            <Users className="mb-4 size-12 text-muted-foreground" />
-                            <p className="text-lg font-medium text-muted-foreground">
+                            <Users className="text-muted-foreground mb-4 size-12" />
+                            <p className="text-muted-foreground text-lg font-medium">
                                 No rooms yet
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground text-sm">
                                 Create a room or join one with an invite code.
                             </p>
                         </CardContent>
@@ -351,7 +351,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {rooms.map((room) => (
                             <Link key={room.id} href={show.url(room.id)}>
-                                <Card className="transition-colors hover:bg-accent/50">
+                                <Card className="hover:bg-accent/50 transition-colors">
                                     <CardHeader className="pb-3">
                                         <div className="flex items-start justify-between">
                                             <CardTitle className="text-lg">
@@ -360,7 +360,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                             <Badge
                                                 variant={
                                                     statusColors[room.status] ??
-                                                    "secondary"
+                                                    'secondary'
                                                 }
                                             >
                                                 {room.status}
@@ -368,26 +368,26 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                         </div>
                                     </CardHeader>
                                     <CardContent className="space-y-3">
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <div className="text-muted-foreground flex items-center gap-2 text-sm">
                                             <Calendar className="size-4" />
                                             {new Date(
                                                 room.date,
                                             ).toLocaleDateString()}
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <div className="text-muted-foreground flex items-center gap-2 text-sm">
                                             <Users className="size-4" />
                                             {room.team_size}v{room.team_size} (
                                             {room.num_teams} teams)
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <div className="text-muted-foreground flex items-center gap-2 text-sm">
                                             <DollarSign className="size-4" />
                                             {formatCurrency(
                                                 room.price_in_cents,
                                                 room.currency,
                                             )}
                                         </div>
-                                        <div className="flex items-center justify-between pt-2 border-t">
-                                            <span className="text-xs text-muted-foreground">
+                                        <div className="flex items-center justify-between border-t pt-2">
+                                            <span className="text-muted-foreground text-xs">
                                                 by {room.creator.username}
                                             </span>
                                             <button
@@ -396,7 +396,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                                                     e.stopPropagation();
                                                     copyCode(room.invite_code);
                                                 }}
-                                                className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-foreground"
+                                                className="text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono text-xs"
                                             >
                                                 {room.invite_code}
                                                 {copiedCode ===
@@ -421,7 +421,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
 Dashboard.layout = {
     breadcrumbs: [
         {
-            title: "Dashboard",
+            title: 'Dashboard',
             href: dashboard(),
         },
     ],

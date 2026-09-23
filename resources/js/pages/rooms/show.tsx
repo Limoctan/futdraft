@@ -1,18 +1,18 @@
-import { Head, router, useForm, usePage } from "@inertiajs/react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
     Dialog,
     DialogContent,
@@ -21,7 +21,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
     Users,
     Calendar,
@@ -32,25 +32,21 @@ import {
     Shield,
     ShieldOff,
     UserMinus,
-} from "lucide-react";
-import { dashboard } from "@/routes";
-import {
-    show,
-    update,
-    assignAdmin,
-    revokeAdmin,
-    removeUser,
-} from "@/routes/rooms";
-import { formatCurrency } from "@/lib/utils";
+} from 'lucide-react';
+import { dashboard } from '@/routes';
+import { update, assignAdmin, revokeAdmin, removeUser } from '@/routes/rooms';
+import { formatCurrency } from '@/lib/utils';
 import {
     currencies,
     statusColors,
     teamSizes,
+    type DraftPick,
     type Player,
     type Team,
-} from "@/types/types";
-import { PlayerList } from "@/components/players/player-list";
-import { CaptainAssignment } from "@/components/teams/captain-assignment";
+} from '@/types/types';
+import { PlayerList } from '@/components/players/player-list';
+import { CaptainAssignment } from '@/components/teams/captain-assignment';
+import { DraftBoard } from '@/components/draft/draft-board';
 
 interface User {
     id: number;
@@ -70,27 +66,30 @@ interface Room {
     price_in_cents: number;
     currency: string;
     status: string;
+    draft_order: number[] | null;
+    current_pick_index: number;
+    draft_started_at: string | null;
     creator: User;
     users: User[];
     players: Player[];
     teams: Team[];
+    draft_picks: DraftPick[];
 }
 
 export default function RoomShow({ room }: { room: Room }) {
     const { auth } = usePage().props as { auth: { user: { id: number } } };
     const [editOpen, setEditOpen] = useState(false);
     const [copiedCode, setCopiedCode] = useState(false);
-    const [activeTab, setActiveTab] = useState("players");
+    const [activeTab, setActiveTab] = useState('players');
 
     const isAdmin = room.users.some(
         (u) => u.id === auth.user.id && u.pivot.is_admin,
     );
     const isMember = room.users.some((u) => u.id === auth.user.id);
-    const currentUser = room.users.find((u) => u.id === auth.user.id);
 
     const editForm = useForm({
         name: room.name,
-        date: room.date.split("T")[0],
+        date: room.date.split('T')[0],
         team_size: String(room.team_size),
         num_teams: String(room.num_teams),
         price_in_cents: String(room.price_in_cents),
@@ -105,7 +104,7 @@ export default function RoomShow({ room }: { room: Room }) {
     }
 
     function copyCode() {
-        navigator.clipboard.writeText(room.invite_code);
+        void navigator.clipboard.writeText(room.invite_code);
         setCopiedCode(true);
         setTimeout(() => setCopiedCode(false), 2000);
     }
@@ -132,13 +131,13 @@ export default function RoomShow({ room }: { room: Room }) {
                             <h1 className="text-2xl font-bold">{room.name}</h1>
                             <Badge
                                 variant={
-                                    statusColors[room.status] ?? "secondary"
+                                    statusColors[room.status] ?? 'secondary'
                                 }
                             >
                                 {room.status}
                             </Badge>
                         </div>
-                        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                        <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-4 text-sm">
                             <span className="flex items-center gap-1">
                                 <Calendar className="size-4" />
                                 {new Date(room.date).toLocaleDateString()}
@@ -160,7 +159,7 @@ export default function RoomShow({ room }: { room: Room }) {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={copyCode}
-                            className="flex items-center gap-2 rounded-md border px-3 py-2 font-mono text-sm hover:bg-accent"
+                            className="hover:bg-accent flex items-center gap-2 rounded-md border px-3 py-2 font-mono text-sm"
                         >
                             {room.invite_code}
                             {copiedCode ? (
@@ -197,14 +196,14 @@ export default function RoomShow({ room }: { room: Room }) {
                                                     value={editForm.data.name}
                                                     onChange={(e) =>
                                                         editForm.setData(
-                                                            "name",
+                                                            'name',
                                                             e.target.value,
                                                         )
                                                     }
                                                     className="mt-1"
                                                 />
                                                 {editForm.errors.name && (
-                                                    <p className="mt-1 text-sm text-destructive">
+                                                    <p className="text-destructive mt-1 text-sm">
                                                         {editForm.errors.name}
                                                     </p>
                                                 )}
@@ -219,14 +218,14 @@ export default function RoomShow({ room }: { room: Room }) {
                                                     value={editForm.data.date}
                                                     onChange={(e) =>
                                                         editForm.setData(
-                                                            "date",
+                                                            'date',
                                                             e.target.value,
                                                         )
                                                     }
                                                     className="mt-1"
                                                 />
                                                 {editForm.errors.date && (
-                                                    <p className="mt-1 text-sm text-destructive">
+                                                    <p className="text-destructive mt-1 text-sm">
                                                         {editForm.errors.date}
                                                     </p>
                                                 )}
@@ -241,7 +240,7 @@ export default function RoomShow({ room }: { room: Room }) {
                                                         }
                                                         onValueChange={(v) =>
                                                             editForm.setData(
-                                                                "team_size",
+                                                                'team_size',
                                                                 v,
                                                             )
                                                         }
@@ -260,7 +259,7 @@ export default function RoomShow({ room }: { room: Room }) {
                                                                             size,
                                                                         )}
                                                                     >
-                                                                        {size}{" "}
+                                                                        {size}{' '}
                                                                         players
                                                                     </SelectItem>
                                                                 ),
@@ -283,7 +282,7 @@ export default function RoomShow({ room }: { room: Room }) {
                                                         }
                                                         onChange={(e) =>
                                                             editForm.setData(
-                                                                "num_teams",
+                                                                'num_teams',
                                                                 e.target.value,
                                                             )
                                                         }
@@ -306,7 +305,7 @@ export default function RoomShow({ room }: { room: Room }) {
                                                         }
                                                         onChange={(e) =>
                                                             editForm.setData(
-                                                                "price_in_cents",
+                                                                'price_in_cents',
                                                                 e.target.value,
                                                             )
                                                         }
@@ -322,7 +321,7 @@ export default function RoomShow({ room }: { room: Room }) {
                                                         }
                                                         onValueChange={(v) =>
                                                             editForm.setData(
-                                                                "currency",
+                                                                'currency',
                                                                 v,
                                                             )
                                                         }
@@ -356,8 +355,8 @@ export default function RoomShow({ room }: { room: Room }) {
                                                 disabled={editForm.processing}
                                             >
                                                 {editForm.processing
-                                                    ? "Saving..."
-                                                    : "Save Changes"}
+                                                    ? 'Saving...'
+                                                    : 'Save Changes'}
                                             </Button>
                                         </DialogFooter>
                                     </form>
@@ -384,17 +383,22 @@ export default function RoomShow({ room }: { room: Room }) {
                     </TabsContent>
 
                     <TabsContent value="draft" className="mt-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Draft</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-muted-foreground">
-                                    Draft functionality will be implemented in a
-                                    future ticket.
-                                </p>
-                            </CardContent>
-                        </Card>
+                        <DraftBoard
+                            room={{
+                                id: room.id,
+                                status: room.status,
+                                team_size: room.team_size,
+                                num_teams: room.num_teams,
+                                draft_order: room.draft_order,
+                                current_pick_index: room.current_pick_index,
+                                draft_started_at: room.draft_started_at,
+                                players: room.players,
+                                teams: room.teams ?? [],
+                                draft_picks: room.draft_picks ?? [],
+                            }}
+                            isAdmin={isAdmin}
+                            currentUserId={auth.user.id}
+                        />
                     </TabsContent>
 
                     <TabsContent value="teams" className="mt-4">
@@ -417,7 +421,7 @@ export default function RoomShow({ room }: { room: Room }) {
                                 <CardTitle>Chat</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-muted-foreground text-sm">
                                     Chat functionality will be implemented in a
                                     future ticket.
                                 </p>
@@ -446,14 +450,14 @@ export default function RoomShow({ room }: { room: Room }) {
                                     className="flex items-center justify-between rounded-lg border p-3"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="flex size-8 items-center justify-center rounded-full bg-muted text-sm font-medium">
+                                        <div className="bg-muted flex size-8 items-center justify-center rounded-full text-sm font-medium">
                                             {user.username[0].toUpperCase()}
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium">
                                                 {user.username}
                                             </p>
-                                            <p className="text-xs text-muted-foreground">
+                                            <p className="text-muted-foreground text-xs">
                                                 {user.email}
                                             </p>
                                         </div>
@@ -500,7 +504,7 @@ export default function RoomShow({ room }: { room: Room }) {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="size-8 text-destructive"
+                                                        className="text-destructive size-8"
                                                         onClick={() =>
                                                             handleRemoveUser(
                                                                 user.id,
@@ -526,7 +530,7 @@ export default function RoomShow({ room }: { room: Room }) {
 RoomShow.layout = {
     breadcrumbs: [
         {
-            title: "Dashboard",
+            title: 'Dashboard',
             href: dashboard(),
         },
     ],

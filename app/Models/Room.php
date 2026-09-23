@@ -43,6 +43,8 @@ class Room extends Model
     /** @use HasFactory<RoomFactory> */
     use HasFactory, SoftDeletes;
 
+    public const PICK_TIMER_MINUTES = 2;
+
     protected $fillable = [
         'user_id',
         'name',
@@ -84,11 +86,17 @@ class Room extends Model
         return $code;
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'room_users')
@@ -96,21 +104,33 @@ class Room extends Model
             ->withTimestamps();
     }
 
+    /**
+     * @return HasMany<Player, $this>
+     */
     public function players(): HasMany
     {
         return $this->hasMany(Player::class);
     }
 
+    /**
+     * @return HasMany<Team, $this>
+     */
     public function teams(): HasMany
     {
         return $this->hasMany(Team::class);
     }
 
+    /**
+     * @return HasMany<Message, $this>
+     */
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
     }
 
+    /**
+     * @return HasMany<DraftPick, $this>
+     */
     public function draftPicks(): HasMany
     {
         return $this->hasMany(DraftPick::class);
@@ -154,5 +174,97 @@ class Room extends Model
         } elseif ($this->status === RoomStatus::Full && $count < $required) {
             $this->update(['status' => RoomStatus::Waiting]);
         }
+    }
+
+    /**
+     * Snake-draft team id for the current pick index.
+     */
+    public function currentDraftTeamId(): ?int
+    {
+        $order = $this->draft_order;
+
+        if (! is_array($order)) {
+            return null;
+        }
+
+        $teamIds = array_values(array_map(
+            static fn ($id): int => (int) $id,
+            $order,
+        ));
+
+        if ($teamIds === []) {
+            return null;
+        }
+
+        $teamCount = count($teamIds);
+        $round = intdiv($this->current_pick_index, $teamCount);
+        $position = $this->current_pick_index % $teamCount;
+
+        if ($round % 2 === 1) {
+            $position = $teamCount - 1 - $position;
+        }
+
+        return $teamIds[$position];
+    }
+
+    public function pickDeadline(): ?Carbon
+    {
+        if ($this->draft_started_at === null) {
+            return null;
+        }
+
+        $lastPickAt = $this->draftPicks()->max('created_at');
+
+        return Carbon::parse($lastPickAt ?? $this->draft_started_at)
+            ->addMinutes(self::PICK_TIMER_MINUTES);
+    }
+
+    public function isPickTimerExpired(): bool
+    {
+        $deadline = $this->pickDeadline();
+
+        return $deadline !== null && now()->greaterThan($deadline);
+    }
+
+    /**
+     * Players not yet on a team. Reserve players are only offered once the
+     * main list (first team_size × num_teams players by id) is exhausted.
+     *
+     * @return Collection<int, Player>
+     */
+    public function availableDraftPlayers(): Collection
+    {
+        $available = $this->players()
+            ->whereDoesntHave('teams')
+            ->orderBy('id')
+            ->get();
+
+        $required = $this->team_size * $this->num_teams;
+        $mainPlayerIds = $this->players()
+            ->orderBy('id')
+            ->limit($required)
+            ->pluck('id');
+
+        $availableMain = $available->filter(
+            fn (Player $player) => $mainPlayerIds->contains($player->id)
+        )->values();
+
+        if ($availableMain->isNotEmpty()) {
+            return $availableMain;
+        }
+
+        return $available->values();
+    }
+
+    public function isDraftComplete(): bool
+    {
+        if ($this->teams()->count() !== $this->num_teams) {
+            return false;
+        }
+
+        return $this->teams()
+            ->withCount('players')
+            ->get()
+            ->every(fn (Team $team) => $team->players_count >= $this->team_size);
     }
 }

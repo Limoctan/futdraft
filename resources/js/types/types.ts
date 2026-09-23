@@ -60,3 +60,22 @@ export interface Team {
     created_at?: string;
     updated_at?: string;
 }
+
+export interface DraftPick {
+    id: number;
+    room_id: number;
+    team_id: number;
+    player_id: number;
+    pick_number: number;
+    picked_by_user_id: number | null;
+    auto_picked: boolean;
+    created_at?: string;
+    updated_at?: string;
+    player: Player;
+    team: {
+        id: number;
+        pick_order: number;
+        captain_user_id: number;
+        captain: TeamUser;
+    };
+}

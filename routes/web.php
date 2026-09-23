@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DraftController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('rooms/{room}/users/{user}', [RoomController::class, 'removeUser'])->name('rooms.removeUser');
     Route::post('rooms/{room}/assign-captains', [RoomController::class, 'assignCaptains'])->name('rooms.assignCaptains');
     Route::post('rooms/{room}/start-draft', [RoomController::class, 'startDraft'])->name('rooms.startDraft');
+    Route::post('rooms/{room}/cancel-draft', [RoomController::class, 'cancelDraft'])->name('rooms.cancelDraft');
+    Route::post('rooms/{room}/draft/pick', [DraftController::class, 'pick'])->name('rooms.draft.pick');
+    Route::post('rooms/{room}/draft/auto-pick', [DraftController::class, 'autoPick'])->name('rooms.draft.autoPick');
+    Route::get('rooms/{room}/draft/current', [DraftController::class, 'current'])->name('rooms.draft.current');
     Route::post('rooms/{room}/players', [PlayerController::class, 'store'])->name('rooms.players.store');
     Route::patch('rooms/{room}/players/{player}', [PlayerController::class, 'update'])->name('rooms.players.update')->scopeBindings();
     Route::delete('rooms/{room}/players/{player}', [PlayerController::class, 'destroy'])->name('rooms.players.destroy')->scopeBindings();
