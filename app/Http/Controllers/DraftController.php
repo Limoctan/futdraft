@@ -17,7 +17,6 @@ class DraftController extends Controller
 {
     public function pick(Request $request, Room $room): RedirectResponse
     {
-        $this->authorizeMember($room);
         $this->ensureDrafting($room);
 
         if ($room->isPickTimerExpired()) {
@@ -60,7 +59,6 @@ class DraftController extends Controller
 
     public function autoPick(Request $request, Room $room): RedirectResponse
     {
-        $this->authorizeMember($room);
         $this->ensureDrafting($room);
 
         if (! $room->isPickTimerExpired()) {
@@ -92,8 +90,6 @@ class DraftController extends Controller
 
     public function current(Request $request, Room $room): JsonResponse
     {
-        $this->authorizeMember($room);
-
         $picks = $room->draftPicks()
             ->orderBy('pick_number')
             ->with(['player', 'team.captain'])
@@ -170,14 +166,5 @@ class DraftController extends Controller
         });
 
         return redirect()->route('rooms.show', $room);
-    }
-
-    private function authorizeMember(Room $room): void
-    {
-        $user = Auth::user();
-
-        if (! $user || ! $room->isMember($user)) {
-            abort(403, 'You are not a member of this room.');
-        }
     }
 }

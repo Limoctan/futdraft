@@ -159,6 +159,11 @@ class Room extends Model
         return $this->playerCount() >= ($this->team_size * $this->num_teams);
     }
 
+    public function isDrafting(): bool
+    {
+        return $this->status === RoomStatus::Drafting;
+    }
+
     public function hasAllCaptains(): bool
     {
         return $this->teams()->count() === $this->num_teams;

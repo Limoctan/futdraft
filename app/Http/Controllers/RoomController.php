@@ -55,8 +55,6 @@ class RoomController extends Controller
 
     public function show(Room $room): Response
     {
-        $this->authorizeRoomAccess($room);
-
         $room->load([
             'creator',
             'users',
@@ -70,8 +68,6 @@ class RoomController extends Controller
 
     public function update(Request $request, Room $room): RedirectResponse
     {
-        $this->authorizeAdmin($room);
-
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'date' => ['sometimes', 'date', 'after_or_equal:today'],
@@ -103,8 +99,6 @@ class RoomController extends Controller
 
     public function assignAdmin(Request $request, Room $room): RedirectResponse
     {
-        $this->authorizeAdmin($room);
-
         $validated = $request->validate([
             'user_id' => ['required', 'exists:users,id'],
         ]);
@@ -116,8 +110,6 @@ class RoomController extends Controller
 
     public function revokeAdmin(Request $request, Room $room): RedirectResponse
     {
-        $this->authorizeAdmin($room);
-
         $validated = $request->validate([
             'user_id' => ['required', 'exists:users,id'],
         ]);
@@ -129,8 +121,6 @@ class RoomController extends Controller
 
     public function removeUser(Request $request, Room $room): RedirectResponse
     {
-        $this->authorizeAdmin($room);
-
         $validated = $request->validate([
             'user_id' => ['required', 'exists:users,id'],
         ]);
@@ -142,8 +132,6 @@ class RoomController extends Controller
 
     public function assignCaptains(Request $request, Room $room): RedirectResponse
     {
-        $this->authorizeAdmin($room);
-
         if (in_array($room->status, [RoomStatus::Drafting, RoomStatus::Completed], true)) {
             abort(403, 'Captains cannot be changed in this room state.');
         }
@@ -172,8 +160,6 @@ class RoomController extends Controller
 
     public function startDraft(Request $request, Room $room): RedirectResponse
     {
-        $this->authorizeAdmin($room);
-
         if (! $room->isFull()) {
             throw ValidationException::withMessages([
                 'room' => 'The room must be full before the draft can start.',
@@ -221,8 +207,6 @@ class RoomController extends Controller
 
     public function cancelDraft(Request $request, Room $room): RedirectResponse
     {
-        $this->authorizeAdmin($room);
-
         if ($room->status !== RoomStatus::Drafting) {
             throw ValidationException::withMessages([
                 'room' => 'There is no active draft to cancel.',
@@ -335,19 +319,5 @@ class RoomController extends Controller
             'is_captain' => true,
             'captain_user_id' => $captainUserId,
         ]);
-    }
-
-    private function authorizeRoomAccess(Room $room): void
-    {
-        if (! $room->isMember(Auth::user())) {
-            abort(403, 'You are not a member of this room.');
-        }
-    }
-
-    private function authorizeAdmin(Room $room): void
-    {
-        if (! $room->isAdmin(Auth::user())) {
-            abort(403, 'You are not an admin of this room.');
-        }
     }
 }

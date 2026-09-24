@@ -15,7 +15,6 @@ class PlayerController extends Controller
 {
     public function store(Request $request, Room $room): RedirectResponse
     {
-        $this->authorizeRoomMember($room);
         $this->authorizeModifiable($room);
 
         $validated = $request->validate([
@@ -37,7 +36,6 @@ class PlayerController extends Controller
 
     public function update(Request $request, Room $room, Player $player): RedirectResponse
     {
-        $this->authorizeRoomMember($room);
         $this->authorizeModifiable($room);
         $this->authorizePlayerInRoom($room, $player);
 
@@ -53,7 +51,6 @@ class PlayerController extends Controller
 
     public function destroy(Room $room, Player $player): RedirectResponse
     {
-        $this->authorizeRoomMember($room);
         $this->authorizeModifiable($room);
         $this->authorizePlayerInRoom($room, $player);
 
@@ -70,7 +67,6 @@ class PlayerController extends Controller
 
     public function markPaid(Request $request, Room $room, Player $player): RedirectResponse
     {
-        $this->authorizeRoomMember($room);
         $this->authorizePlayerInRoom($room, $player);
 
         $isAdmin = $room->isAdmin(Auth::user());
@@ -108,7 +104,6 @@ class PlayerController extends Controller
 
     public function paymentImage(Room $room, Player $player): Response
     {
-        $this->authorizeRoomMember($room);
         $this->authorizePlayerInRoom($room, $player);
 
         $path = $player->payment?->reference_image_path;
@@ -118,15 +113,6 @@ class PlayerController extends Controller
         abort_unless(Storage::disk('payments')->exists($path), 404);
 
         return Storage::disk('payments')->response($path);
-    }
-
-    private function authorizeRoomMember(Room $room): void
-    {
-        $user = Auth::user();
-
-        if (! $user || ! $room->isMember($user)) {
-            abort(403, 'You are not a member of this room.');
-        }
     }
 
     private function authorizeModifiable(Room $room): void
