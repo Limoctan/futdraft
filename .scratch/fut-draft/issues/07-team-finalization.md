@@ -4,12 +4,12 @@
 
 **Blocked by:** 06 (Snake Draft).
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Create `TeamController` (update) for color/name changes
-- [ ] Create color palette (~12 colors) with duplicate prevention per room
-- [ ] Create `TeamView` component (team cards with color picker)
-- [ ] Create `TeamImageCard` component (html2canvas target)
-- [ ] Implement client-side image generation (html2canvas) for shareable team image
-- [ ] Display finalized teams with captain, players, and color
-- [ ] Feature tests: update team color, prevent duplicate colors
+- [x] Create `TeamController` (update) for color/name changes
+- [x] Create color palette (~12 colors) with duplicate prevention per room
+- [x] Create `TeamView` component (team cards with color picker)
+- [x] Create `TeamImageCard` component (html2canvas target)
+- [x] Implement client-side image generation (html2canvas) for shareable team image
+- [x] Display finalized teams with captain, players, and color
+- [x] Feature tests: update team color, prevent duplicate colors

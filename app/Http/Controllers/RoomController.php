@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Currency;
 use App\Enums\RoomStatus;
+use App\Enums\TeamColor;
 use App\Models\Player;
 use App\Models\Room;
 use App\Models\Team;
@@ -63,7 +64,10 @@ class RoomController extends Controller
             'draftPicks' => fn ($query) => $query->orderBy('pick_number')->with(['player', 'team.captain']),
         ]);
 
-        return Inertia::render('rooms/show', ['room' => $room]);
+        return Inertia::render('rooms/show', [
+            'room' => $room,
+            'teamColors' => TeamColor::options(),
+        ]);
     }
 
     public function update(Request $request, Room $room): RedirectResponse

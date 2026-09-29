@@ -3,6 +3,7 @@
 use App\Http\Controllers\DraftController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\TeamController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -22,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('rooms/{room}/players/{player}', [PlayerController::class, 'destroy'])->name('rooms.players.destroy')->scopeBindings();
         Route::post('rooms/{room}/players/{player}/pay', [PlayerController::class, 'markPaid'])->name('rooms.players.markPaid')->scopeBindings();
         Route::get('rooms/{room}/players/{player}/payment', [PlayerController::class, 'paymentImage'])->name('rooms.players.paymentImage')->scopeBindings();
+        Route::patch('rooms/{room}/teams/{team}', [TeamController::class, 'update'])->name('rooms.teams.update')->scopeBindings();
     });
 
     Route::middleware('can:manage,room')->group(function () {

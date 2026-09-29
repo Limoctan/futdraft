@@ -43,9 +43,11 @@ import {
     type DraftPick,
     type Player,
     type Team,
+    type TeamColorOption,
 } from '@/types/types';
 import { PlayerList } from '@/components/players/player-list';
 import { CaptainAssignment } from '@/components/teams/captain-assignment';
+import { TeamView } from '@/components/teams/team-view';
 import { DraftBoard } from '@/components/draft/draft-board';
 
 interface User {
@@ -76,7 +78,13 @@ interface Room {
     draft_picks: DraftPick[];
 }
 
-export default function RoomShow({ room }: { room: Room }) {
+export default function RoomShow({
+    room,
+    teamColors,
+}: {
+    room: Room;
+    teamColors: TeamColorOption[];
+}) {
     const { auth } = usePage().props as { auth: { user: { id: number } } };
     const [editOpen, setEditOpen] = useState(false);
     const [copiedCode, setCopiedCode] = useState(false);
@@ -375,17 +383,30 @@ export default function RoomShow({ room }: { room: Room }) {
                     </TabsList>
 
                     <TabsContent value="teams" className="mt-4">
-                        <CaptainAssignment
-                            room={{
-                                id: room.id,
-                                status: room.status,
-                                num_teams: room.num_teams,
-                                users: room.users,
-                                players: room.players,
-                                teams: room.teams ?? [],
-                            }}
-                            isAdmin={isAdmin}
-                        />
+                        {room.status === 'completed' ? (
+                            <TeamView
+                                room={{
+                                    id: room.id,
+                                    teams: room.teams ?? [],
+                                }}
+                                roomName={room.name}
+                                teamColors={teamColors}
+                                currentUserId={auth.user.id}
+                                isAdmin={isAdmin}
+                            />
+                        ) : (
+                            <CaptainAssignment
+                                room={{
+                                    id: room.id,
+                                    status: room.status,
+                                    num_teams: room.num_teams,
+                                    users: room.users,
+                                    players: room.players,
+                                    teams: room.teams ?? [],
+                                }}
+                                isAdmin={isAdmin}
+                            />
+                        )}
                     </TabsContent>
 
                     <TabsContent value="players" className="mt-4">

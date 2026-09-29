@@ -61,6 +61,11 @@ export interface Team {
     updated_at?: string;
 }
 
+export interface TeamColorOption {
+    value: string;
+    label: string;
+}
+
 export interface DraftPick {
     id: number;
     room_id: number;
