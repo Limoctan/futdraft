@@ -369,10 +369,24 @@ export default function RoomShow({ room }: { room: Room }) {
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
                     <TabsList>
                         <TabsTrigger value="players">Players</TabsTrigger>
-                        <TabsTrigger value="draft">Draft</TabsTrigger>
                         <TabsTrigger value="teams">Teams</TabsTrigger>
+                        <TabsTrigger value="draft">Draft</TabsTrigger>
                         <TabsTrigger value="chat">Chat</TabsTrigger>
                     </TabsList>
+
+                    <TabsContent value="teams" className="mt-4">
+                        <CaptainAssignment
+                            room={{
+                                id: room.id,
+                                status: room.status,
+                                num_teams: room.num_teams,
+                                users: room.users,
+                                players: room.players,
+                                teams: room.teams ?? [],
+                            }}
+                            isAdmin={isAdmin}
+                        />
+                    </TabsContent>
 
                     <TabsContent value="players" className="mt-4">
                         <PlayerList
@@ -398,20 +412,6 @@ export default function RoomShow({ room }: { room: Room }) {
                             }}
                             isAdmin={isAdmin}
                             currentUserId={auth.user.id}
-                        />
-                    </TabsContent>
-
-                    <TabsContent value="teams" className="mt-4">
-                        <CaptainAssignment
-                            room={{
-                                id: room.id,
-                                status: room.status,
-                                num_teams: room.num_teams,
-                                users: room.users,
-                                players: room.players,
-                                teams: room.teams ?? [],
-                            }}
-                            isAdmin={isAdmin}
                         />
                     </TabsContent>
 
