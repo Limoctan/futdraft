@@ -66,7 +66,6 @@ export interface TeamColorOption {
     label: string;
 }
 
-
 export interface TeamViewRoom {
     id: number;
     teams: Team[];

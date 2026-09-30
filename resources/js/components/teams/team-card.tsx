@@ -1,16 +1,21 @@
-import { teamLabel, sortTeamPlayers, captainLabel } from "@/types/team-labels";
-import { Team, TeamColorOption, TeamViewRoom } from "@/types/types";
-import { router } from "@inertiajs/react";
-import { Users, Crown, Save } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
-import { Input } from "../ui/input";
+import { teamLabel, sortTeamPlayers, captainLabel } from '@/types/team-labels';
+import { Team, TeamColorOption, TeamViewRoom } from '@/types/types';
+import { router } from '@inertiajs/react';
+import { Users, Crown, Save } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Button } from '../ui/button';
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+    CardContent,
+} from '../ui/card';
+import { Input } from '../ui/input';
 import { update as updateTeam } from '@/routes/rooms/teams';
 
 interface TeamCardProps {
     room: TeamViewRoom;
-    roomName: string;
     team: Team;
     teamColors: TeamColorOption[];
     currentUserId: number;
@@ -20,7 +25,6 @@ interface TeamCardProps {
 
 export function TeamCard({
     room,
-    roomName,
     team,
     teamColors,
     currentUserId,
@@ -34,7 +38,6 @@ export function TeamCard({
     const [nameError, setNameError] = useState<string | null>(null);
     const [savingColor, setSavingColor] = useState(false);
     const [savingName, setSavingName] = useState(false);
-
 
     useEffect(() => {
         setColorPending(null);
@@ -209,7 +212,6 @@ export function TeamCard({
                 {canManage && nameError && (
                     <p className="text-destructive text-sm">{nameError}</p>
                 )}
-
             </CardContent>
         </Card>
     );

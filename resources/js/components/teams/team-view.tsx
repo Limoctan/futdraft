@@ -1,7 +1,7 @@
-import type { TeamColorOption, TeamViewRoom } from "@/types/types";
-import { TeamCard } from "./team-card";
-import { Share2, Download } from "lucide-react";
-import { Button } from "../ui/button";
+import type { TeamColorOption, TeamViewRoom } from '@/types/types';
+import { TeamCard } from './team-card';
+import { Share2, Download } from 'lucide-react';
+import { Button } from '../ui/button';
 import {
     Dialog,
     DialogContent,
@@ -10,11 +10,11 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import { TeamImageCard } from "./team-image-card";
-import { useRef, useState } from "react";
-import html2canvas from "html2canvas-pro";
-import { toast } from "sonner";
+} from '@/components/ui/dialog';
+import { TeamImageCard } from './team-image-card';
+import { useRef, useState } from 'react';
+import html2canvas from 'html2canvas-pro';
+import { toast } from 'sonner';
 
 interface TeamViewProps {
     room: TeamViewRoom;
@@ -27,10 +27,10 @@ interface TeamViewProps {
 function imageFileName(label: string): string {
     const slug = label
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
 
-    return `${slug || "team"}-team.png`;
+    return `${slug || 'team'}-team.png`;
 }
 
 export function TeamView({
@@ -55,16 +55,16 @@ export function TeamView({
 
         try {
             const canvas = await html2canvas(node, {
-                backgroundColor: "#ffffff",
+                backgroundColor: '#ffffff',
             });
 
-            const link = document.createElement("a");
-            link.download = imageFileName("Teams " + roomName);
-            link.href = canvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            link.download = imageFileName('Teams ' + roomName);
+            link.href = canvas.toDataURL('image/png');
             link.click();
         } catch (e) {
             console.error(e);
-            toast.error("Could not generate the team image.");
+            toast.error('Could not generate the team image.');
         } finally {
             setGenerating(false);
         }
@@ -72,12 +72,11 @@ export function TeamView({
 
     return (
         <div>
-            <div className="grid gap-4 sm:grid-cols-2 mb-4">
+            <div className="mb-4 grid gap-4 sm:grid-cols-2">
                 {room.teams.map((team) => (
                     <TeamCard
                         key={team.id}
                         room={room}
-                        roomName={roomName}
                         team={team}
                         teamColors={teamColors}
                         currentUserId={currentUserId}
@@ -109,11 +108,7 @@ export function TeamView({
                     </DialogHeader>
 
                     <div className="flex justify-center overflow-x-auto">
-                        <TeamImageCard
-                            teams={room.teams}
-                            roomName={roomName}
-                            imageRef={imageRef}
-                        />
+                        <TeamImageCard teams={room.teams} imageRef={imageRef} />
                     </div>
 
                     <DialogFooter>
@@ -122,7 +117,7 @@ export function TeamView({
                             disabled={generating}
                         >
                             <Download className="mr-2 size-4" />
-                            {generating ? "Generating..." : "Download PNG"}
+                            {generating ? 'Generating...' : 'Download PNG'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

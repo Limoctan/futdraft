@@ -1,25 +1,20 @@
-import type { Ref } from "react";
-import { Crown, Star } from "lucide-react";
-import type { Team } from "@/types/types";
-import { captainLabel, sortTeamPlayers, teamLabel } from "@/types/team-labels";
+import type { Ref } from 'react';
+import { Crown, Star } from 'lucide-react';
+import type { Team } from '@/types/types';
+import { captainLabel, sortTeamPlayers } from '@/types/team-labels';
 
 interface TeamImageCardProps {
     teams: Team[];
-    roomName: string;
     imageRef: Ref<HTMLDivElement>;
 }
 
-export function TeamImageCard({
-    teams,
-    roomName,
-    imageRef,
-}: TeamImageCardProps) {
+export function TeamImageCard({ teams, imageRef }: TeamImageCardProps) {
     return (
         <div
             ref={imageRef}
-            className="grid gap-4 sm:grid-cols-2 w-150 overflow-hidden rounded-2xl border border-neutral-200 bg-white text-neutral-900"
+            className="grid w-150 gap-4 overflow-hidden rounded-2xl border border-neutral-200 bg-white text-neutral-900 sm:grid-cols-2"
         >
-            {teams.map((team, index) => {
+            {teams.map((team) => {
                 const players = sortTeamPlayers(team.players);
 
                 return (
