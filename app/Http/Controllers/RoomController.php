@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Enums\Currency;
 use App\Enums\RoomStatus;
 use App\Enums\TeamColor;
+use App\Events\CaptainAssigned;
+use App\Events\DraftStarted;
+use App\Events\RoomUpdated;
 use App\Models\Player;
 use App\Models\Room;
 use App\Models\Team;
@@ -83,6 +86,8 @@ class RoomController extends Controller
 
         $room->update($validated);
 
+        event(new RoomUpdated($room));
+
         return redirect()->route('rooms.show', $room);
     }
 
@@ -98,6 +103,8 @@ class RoomController extends Controller
             $room->users()->attach(Auth::id(), ['is_admin' => false]);
         }
 
+        event(new RoomUpdated($room));
+
         return redirect()->route('rooms.show', $room);
     }
 
@@ -108,6 +115,8 @@ class RoomController extends Controller
         ]);
 
         $room->users()->updateExistingPivot($validated['user_id'], ['is_admin' => true]);
+
+        event(new RoomUpdated($room));
 
         return redirect()->route('rooms.show', $room);
     }
@@ -120,6 +129,8 @@ class RoomController extends Controller
 
         $room->users()->updateExistingPivot($validated['user_id'], ['is_admin' => false]);
 
+        event(new RoomUpdated($room));
+
         return redirect()->route('rooms.show', $room);
     }
 
@@ -130,6 +141,8 @@ class RoomController extends Controller
         ]);
 
         $room->users()->detach($validated['user_id']);
+
+        event(new RoomUpdated($room));
 
         return redirect()->route('rooms.show', $room);
     }
@@ -148,7 +161,9 @@ class RoomController extends Controller
 
         $this->validateCaptainAssignments($room, $validated['captains']);
 
-        DB::transaction(function () use ($room, $validated) {
+        $teams = DB::transaction(function () use ($room, $validated) {
+            $teams = [];
+
             foreach ($validated['captains'] as $index => $assignment) {
                 $team = $room->teams()->updateOrCreate(
                     ['pick_order' => $index + 1],
@@ -156,8 +171,16 @@ class RoomController extends Controller
                 );
 
                 $this->assignSelfPick($room, $team, (int) $assignment['player_id'], (int) $assignment['user_id']);
+
+                $teams[] = $team;
             }
+
+            return $teams;
         });
+
+        foreach ($teams as $team) {
+            event(new CaptainAssigned($room, $team));
+        }
 
         return redirect()->route('rooms.show', $room);
     }
@@ -206,6 +229,8 @@ class RoomController extends Controller
             ]);
         });
 
+        event(new DraftStarted($room));
+
         return redirect()->route('rooms.show', $room);
     }
 
@@ -231,6 +256,8 @@ class RoomController extends Controller
                 'draft_started_at' => null,
             ]);
         });
+
+        event(new RoomUpdated($room));
 
         return redirect()->route('rooms.show', $room);
     }

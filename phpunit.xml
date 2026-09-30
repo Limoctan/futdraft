@@ -28,6 +28,9 @@
         <env name="DB_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="REVERB_APP_ID" value="12345"/>
+        <env name="REVERB_APP_KEY" value="testing-key"/>
+        <env name="REVERB_APP_SECRET" value="testing-secret"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>

@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Enums\RoomStatus;
+use App\Events\PaymentMarked;
+use App\Events\PlayerAdded;
+use App\Events\PlayerRemoved;
+use App\Events\PlayerUpdated;
 use App\Models\Player;
 use App\Models\Room;
 use Illuminate\Http\RedirectResponse;
@@ -22,7 +26,7 @@ class PlayerController extends Controller
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
         ]);
 
-        $room->players()->create([
+        $player = $room->players()->create([
             'name' => $validated['name'],
             'rating' => $validated['rating'],
             'is_captain' => false,
@@ -30,6 +34,8 @@ class PlayerController extends Controller
         ]);
 
         $room->syncCapacityStatus();
+
+        event(new PlayerAdded($room, $player));
 
         return redirect()->route('rooms.show', $room);
     }
@@ -46,6 +52,8 @@ class PlayerController extends Controller
 
         $player->update($validated);
 
+        event(new PlayerUpdated($room, $player));
+
         return redirect()->route('rooms.show', $room);
     }
 
@@ -61,6 +69,8 @@ class PlayerController extends Controller
         $player->delete();
 
         $room->syncCapacityStatus();
+
+        event(new PlayerRemoved($room, $player->id));
 
         return redirect()->route('rooms.show', $room);
     }
@@ -98,6 +108,8 @@ class PlayerController extends Controller
         }
 
         $player->payment()->updateOrCreate([], $paymentAttributes);
+
+        event(new PaymentMarked($room, $player));
 
         return redirect()->route('rooms.show', $room);
     }

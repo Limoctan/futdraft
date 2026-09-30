@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\RoomStatus;
 use App\Enums\TeamColor;
+use App\Events\TeamUpdated;
 use App\Models\Room;
 use App\Models\Team;
 use Illuminate\Http\RedirectResponse;
@@ -32,6 +33,8 @@ class TeamController extends Controller
         }
 
         $team->update($validated);
+
+        event(new TeamUpdated($room, $team));
 
         return redirect()->route('rooms.show', $room);
     }

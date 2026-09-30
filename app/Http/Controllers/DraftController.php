@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\RoomStatus;
+use App\Events\DraftCompleted;
+use App\Events\DraftPickMade;
 use App\Models\Player;
 use App\Models\Room;
 use App\Models\Team;
@@ -145,11 +147,11 @@ class DraftController extends Controller
 
     private function recordPick(Room $room, Team $team, Player $player, bool $autoPicked, int $pickedByUserId): RedirectResponse
     {
-        DB::transaction(function () use ($room, $team, $player, $autoPicked, $pickedByUserId) {
+        $draftPick = DB::transaction(function () use ($room, $team, $player, $autoPicked, $pickedByUserId) {
             $nextTeamPickNumber = $team->players()->count() + 1;
             $team->players()->attach($player->id, ['pick_number' => $nextTeamPickNumber]);
 
-            $room->draftPicks()->create([
+            $draftPick = $room->draftPicks()->create([
                 'team_id' => $team->id,
                 'player_id' => $player->id,
                 'pick_number' => $room->draftPicks()->max('pick_number') + 1,
@@ -163,7 +165,15 @@ class DraftController extends Controller
             if ($room->isDraftComplete()) {
                 $room->update(['status' => RoomStatus::Completed]);
             }
+
+            return $draftPick;
         });
+
+        event(new DraftPickMade($room, $draftPick));
+
+        if ($room->status === RoomStatus::Completed) {
+            event(new DraftCompleted($room));
+        }
 
         return redirect()->route('rooms.show', $room);
     }
