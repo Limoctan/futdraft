@@ -66,6 +66,12 @@ export interface TeamColorOption {
     label: string;
 }
 
+
+export interface TeamViewRoom {
+    id: number;
+    teams: Team[];
+}
+
 export interface DraftPick {
     id: number;
     room_id: number;

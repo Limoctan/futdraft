@@ -22,6 +22,7 @@ import {
 import { cancelDraft, startDraft } from '@/routes/rooms';
 import { autoPick, pick } from '@/routes/rooms/draft';
 import type { DraftPick, Player, Team } from '@/types/types';
+import { teamLabel } from '@/types/team-labels';
 
 const PICK_TIMER_MS = 2 * 60 * 1000;
 
@@ -401,7 +402,7 @@ export function DraftBoard({ room, isAdmin, currentUserId }: DraftBoardProps) {
                             <CardTitle className="flex items-center justify-between text-base">
                                 <span className="flex items-center gap-2">
                                     <Crown className="size-4" />
-                                    Team {team.pick_order}
+                                    {teamLabel(team)}
                                 </span>
                                 <span
                                     className="size-4 rounded-full border"
