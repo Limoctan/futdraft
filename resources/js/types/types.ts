@@ -71,6 +71,16 @@ export interface TeamViewRoom {
     teams: Team[];
 }
 
+export interface ChatMessage {
+    id: number;
+    room_id: number;
+    user_id: number;
+    body: string;
+    created_at: string;
+    updated_at: string;
+    user: TeamUser;
+}
+
 export interface DraftPick {
     id: number;
     room_id: number;

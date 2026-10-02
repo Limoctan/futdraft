@@ -40,6 +40,7 @@ import {
     currencies,
     statusColors,
     teamSizes,
+    type ChatMessage,
     type DraftPick,
     type Player,
     type Team,
@@ -49,6 +50,8 @@ import { PlayerList } from '@/components/players/player-list';
 import { CaptainAssignment } from '@/components/teams/captain-assignment';
 import { TeamView } from '@/components/teams/team-view';
 import { DraftBoard } from '@/components/draft/draft-board';
+import { RoomChat } from '@/components/chat/room-chat';
+import { useRoomChannel } from '@/hooks/use-room-channel';
 
 interface User {
     id: number;
@@ -75,6 +78,7 @@ interface Room {
     users: User[];
     players: Player[];
     teams: Team[];
+    messages: ChatMessage[];
     draft_picks: DraftPick[];
 }
 
@@ -89,6 +93,8 @@ export default function RoomShow({
     const [editOpen, setEditOpen] = useState(false);
     const [copiedCode, setCopiedCode] = useState(false);
     const [activeTab, setActiveTab] = useState('players');
+
+    useRoomChannel(room.id);
 
     const isAdmin = room.users.some(
         (u) => u.id === auth.user.id && u.pivot.is_admin,
@@ -437,17 +443,11 @@ export default function RoomShow({
                     </TabsContent>
 
                     <TabsContent value="chat" className="mt-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Chat</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-muted-foreground text-sm">
-                                    Chat functionality will be implemented in a
-                                    future ticket.
-                                </p>
-                            </CardContent>
-                        </Card>
+                        <RoomChat
+                            roomId={room.id}
+                            messages={room.messages ?? []}
+                            currentUserId={auth.user.id}
+                        />
                     </TabsContent>
                 </Tabs>
 

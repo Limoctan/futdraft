@@ -64,6 +64,7 @@ class RoomController extends Controller
             'users',
             'players' => fn ($query) => $query->orderBy('id')->with('payment'),
             'teams' => fn ($query) => $query->orderBy('pick_order')->with(['captain', 'players']),
+            'messages' => fn ($query) => $query->orderBy('id')->with('user:id,name,username,email'),
             'draftPicks' => fn ($query) => $query->orderBy('pick_number')->with(['player', 'team.captain']),
         ]);
 

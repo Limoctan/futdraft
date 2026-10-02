@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DraftController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\RoomController;
@@ -24,6 +25,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('rooms/{room}/players/{player}/pay', [PlayerController::class, 'markPaid'])->name('rooms.players.markPaid')->scopeBindings();
         Route::get('rooms/{room}/players/{player}/payment', [PlayerController::class, 'paymentImage'])->name('rooms.players.paymentImage')->scopeBindings();
         Route::patch('rooms/{room}/teams/{team}', [TeamController::class, 'update'])->name('rooms.teams.update')->scopeBindings();
+        Route::get('rooms/{room}/messages', [ChatController::class, 'index'])->name('rooms.messages.index');
+        Route::post('rooms/{room}/messages', [ChatController::class, 'store'])->name('rooms.messages.store');
     });
 
     Route::middleware('can:manage,room')->group(function () {
