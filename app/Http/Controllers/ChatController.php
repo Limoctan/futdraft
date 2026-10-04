@@ -33,6 +33,6 @@ class ChatController extends Controller
 
         event(new NewMessage($room, $message));
 
-        return redirect()->route('rooms.show', $room);
+        return to_route('rooms.show', $room);
     }
 }
