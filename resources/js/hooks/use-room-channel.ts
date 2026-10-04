@@ -17,6 +17,6 @@ const roomEvents = [
 
 export function useRoomChannel(roomId: number): void {
     useEchoPresence(`room.${roomId}`, roomEvents, () => {
-        router.reload({ only: ['room'] });
+        //router.reload({ only: ['room'] });
     });
 }
