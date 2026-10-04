@@ -18,7 +18,7 @@ export function TeamImageCard({ teams, imageRef }: TeamImageCardProps) {
                 const players = sortTeamPlayers(team.players);
 
                 return (
-                    <div className="px-6 py-5" key={team.id}>
+                    <div className="px-6 py-2" key={team.id}>
                         <div className="flex items-center justify-between rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3">
                             <span className="flex items-center gap-2 text-sm text-neutral-500">
                                 <Crown
@@ -36,7 +36,7 @@ export function TeamImageCard({ teams, imageRef }: TeamImageCardProps) {
                             {players.map((player, index) => (
                                 <li
                                     key={player.id}
-                                    className="flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-2.5"
+                                    className="flex items-center justify-between rounded-lg border border-neutral-200 px-4 py-1.5"
                                 >
                                     <span className="flex items-center gap-3 text-sm font-medium">
                                         <span
