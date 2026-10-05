@@ -32,7 +32,14 @@ class RoomController extends Controller
             ->with('creator')
             ->get();
 
-        return Inertia::render('dashboard', ['rooms' => $rooms]);
+        [$activeRooms, $archivedRooms] = $rooms
+            ->partition(fn (Room $room) => $room->status !== RoomStatus::Completed)
+            ->map(fn ($rooms) => $rooms->values());
+
+        return Inertia::render('dashboard', [
+            'rooms' => $activeRooms,
+            'archivedRooms' => $archivedRooms,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -213,6 +220,8 @@ class RoomController extends Controller
         }
 
         DB::transaction(function () use ($room) {
+            $room->syncCapacityStatus();
+
             $draftOrder = $room->teams()
                 ->get()
                 ->shuffle()
@@ -222,8 +231,7 @@ class RoomController extends Controller
 
             $this->recordSelfPicks($room, $draftOrder);
 
-            $room->update([
-                'status' => RoomStatus::Drafting,
+            $room->transitionTo(RoomStatus::Drafting, [
                 'draft_started_at' => now(),
                 'draft_order' => $draftOrder,
                 'current_pick_index' => 0,
@@ -250,8 +258,7 @@ class RoomController extends Controller
                 $team->players()->wherePivot('pick_number', '>', 1)->detach();
             }
 
-            $room->update([
-                'status' => RoomStatus::Waiting,
+            $room->transitionTo(RoomStatus::Waiting, [
                 'draft_order' => null,
                 'current_pick_index' => 0,
                 'draft_started_at' => null,

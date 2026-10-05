@@ -163,7 +163,7 @@ class DraftController extends Controller
             $room->refresh();
 
             if ($room->isDraftComplete()) {
-                $room->update(['status' => RoomStatus::Completed]);
+                $room->transitionTo(RoomStatus::Completed);
             }
 
             return $draftPick;

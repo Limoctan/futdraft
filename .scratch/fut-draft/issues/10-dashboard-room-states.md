@@ -4,10 +4,10 @@
 
 **Blocked by:** 02 (Room Management), 07 (Team Finalization).
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Implement room state display on dashboard (badges for waiting/full/drafting/completed)
-- [ ] Archive completed rooms (hidden from main dashboard list)
-- [ ] Implement state machine transitions in Room model
-- [ ] Update `RoomController@index` to filter/archive completed rooms
-- [ ] Feature tests: room transitions through all states, completed rooms archived on dashboard
+- [x] Implement room state display on dashboard (badges for waiting/full/drafting/completed)
+- [x] Archive completed rooms (hidden from main dashboard list)
+- [x] Implement state machine transitions in Room model
+- [x] Update `RoomController@index` to filter/archive completed rooms
+- [x] Feature tests: room transitions through all states, completed rooms archived on dashboard

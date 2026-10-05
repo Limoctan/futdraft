@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use LogicException;
 
 /**
  * @property int $id
@@ -44,6 +45,18 @@ class Room extends Model
     use HasFactory, SoftDeletes;
 
     public const PICK_TIMER_MINUTES = 2;
+
+    /**
+     * Allowed status transitions, keyed by the current status value.
+     *
+     * @var array<string, array<int, RoomStatus>>
+     */
+    private const TRANSITIONS = [
+        RoomStatus::Waiting->value => [RoomStatus::Full],
+        RoomStatus::Full->value => [RoomStatus::Drafting, RoomStatus::Waiting],
+        RoomStatus::Drafting->value => [RoomStatus::Completed, RoomStatus::Waiting],
+        RoomStatus::Completed->value => [],
+    ];
 
     protected $fillable = [
         'user_id',
@@ -169,15 +182,38 @@ class Room extends Model
         return $this->teams()->count() === $this->num_teams;
     }
 
+    public function canTransitionTo(RoomStatus $status): bool
+    {
+        return in_array($status, self::TRANSITIONS[$this->status->value], true);
+    }
+
+    /**
+     * Move the room to the given status, optionally persisting extra attributes.
+     *
+     * @param  array<string, mixed>  $attributes
+     *
+     * @throws LogicException when the transition is not allowed by the state machine.
+     */
+    public function transitionTo(RoomStatus $status, array $attributes = []): void
+    {
+        if (! $this->canTransitionTo($status)) {
+            throw new LogicException(
+                "A room cannot transition from [{$this->status->value}] to [{$status->value}]."
+            );
+        }
+
+        $this->update([...$attributes, 'status' => $status]);
+    }
+
     public function syncCapacityStatus(): void
     {
         $required = $this->team_size * $this->num_teams;
         $count = $this->playerCount();
 
-        if ($this->status === RoomStatus::Waiting && $count >= $required) {
-            $this->update(['status' => RoomStatus::Full]);
-        } elseif ($this->status === RoomStatus::Full && $count < $required) {
-            $this->update(['status' => RoomStatus::Waiting]);
+        if ($count >= $required && $this->canTransitionTo(RoomStatus::Full)) {
+            $this->transitionTo(RoomStatus::Full);
+        } elseif ($count < $required && $this->canTransitionTo(RoomStatus::Waiting)) {
+            $this->transitionTo(RoomStatus::Waiting);
         }
     }
 

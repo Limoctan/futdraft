@@ -1,4 +1,3 @@
-import { router } from '@inertiajs/react';
 import { useEchoPresence } from '@laravel/echo-react';
 
 const roomEvents = [

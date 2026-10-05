@@ -42,7 +42,13 @@ interface Room {
     users: Array<{ id: number; pivot: { is_admin: boolean } }>;
 }
 
-export default function Dashboard({ rooms }: { rooms: Room[] }) {
+export default function Dashboard({
+    rooms,
+    archivedRooms,
+}: {
+    rooms: Room[];
+    archivedRooms: Room[];
+}) {
     const [createOpen, setCreateOpen] = useState(false);
     const [joinOpen, setJoinOpen] = useState(false);
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -335,7 +341,7 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                     </div>
                 </div>
 
-                {rooms.length === 0 ? (
+                {rooms.length === 0 && archivedRooms.length === 0 && (
                     <Card>
                         <CardContent className="flex flex-col items-center justify-center py-12">
                             <Users className="text-muted-foreground mb-4 size-12" />
@@ -347,74 +353,105 @@ export default function Dashboard({ rooms }: { rooms: Room[] }) {
                             </p>
                         </CardContent>
                     </Card>
-                ) : (
+                )}
+
+                {rooms.length > 0 && (
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {rooms.map((room) => (
-                            <Link key={room.id} href={show.url(room.id)}>
-                                <Card className="hover:bg-accent/50 transition-colors">
-                                    <CardHeader className="pb-3">
-                                        <div className="flex items-start justify-between">
-                                            <CardTitle className="text-lg">
-                                                {room.name}
-                                            </CardTitle>
-                                            <Badge
-                                                variant={
-                                                    statusColors[room.status] ??
-                                                    'secondary'
-                                                }
-                                            >
-                                                {room.status}
-                                            </Badge>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="space-y-3">
-                                        <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                                            <Calendar className="size-4" />
-                                            {new Date(
-                                                room.date,
-                                            ).toLocaleDateString()}
-                                        </div>
-                                        <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                                            <Users className="size-4" />
-                                            {room.team_size}v{room.team_size} (
-                                            {room.num_teams} teams)
-                                        </div>
-                                        <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                                            <DollarSign className="size-4" />
-                                            {formatCurrency(
-                                                room.price_in_cents,
-                                                room.currency,
-                                            )}
-                                        </div>
-                                        <div className="flex items-center justify-between border-t pt-2">
-                                            <span className="text-muted-foreground text-xs">
-                                                by {room.creator.username}
-                                            </span>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    copyCode(room.invite_code);
-                                                }}
-                                                className="text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono text-xs"
-                                            >
-                                                {room.invite_code}
-                                                {copiedCode ===
-                                                room.invite_code ? (
-                                                    <Check className="size-3 text-green-500" />
-                                                ) : (
-                                                    <Copy className="size-3" />
-                                                )}
-                                            </button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </Link>
+                            <RoomCard
+                                key={room.id}
+                                room={room}
+                                copiedCode={copiedCode}
+                                onCopy={copyCode}
+                            />
                         ))}
+                    </div>
+                )}
+
+                {archivedRooms.length > 0 && (
+                    <div className="flex flex-col gap-4">
+                        <div>
+                            <h2 className="text-lg font-semibold">Archived</h2>
+                            <p className="text-muted-foreground text-sm">
+                                Completed matches are archived here.
+                            </p>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {archivedRooms.map((room) => (
+                                <RoomCard
+                                    key={room.id}
+                                    room={room}
+                                    copiedCode={copiedCode}
+                                    onCopy={copyCode}
+                                />
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>
         </>
+    );
+}
+
+function RoomCard({
+    room,
+    copiedCode,
+    onCopy,
+}: {
+    room: Room;
+    copiedCode: string | null;
+    onCopy: (code: string) => void;
+}) {
+    return (
+        <Link href={show.url(room.id)}>
+            <Card className="hover:bg-accent/50 transition-colors">
+                <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                        <CardTitle className="text-lg">{room.name}</CardTitle>
+                        <Badge
+                            variant={statusColors[room.status] ?? 'secondary'}
+                        >
+                            {room.status}
+                        </Badge>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                    <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                        <Calendar className="size-4" />
+                        {new Date(room.date).toLocaleDateString()}
+                    </div>
+                    <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                        <Users className="size-4" />
+                        {room.team_size}v{room.team_size} ({room.num_teams}{' '}
+                        teams)
+                    </div>
+                    <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                        <DollarSign className="size-4" />
+                        {formatCurrency(room.price_in_cents, room.currency)}
+                    </div>
+                    <div className="flex items-center justify-between border-t pt-2">
+                        <span className="text-muted-foreground text-xs">
+                            by {room.creator.username}
+                        </span>
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onCopy(room.invite_code);
+                            }}
+                            className="text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono text-xs"
+                        >
+                            {room.invite_code}
+                            {copiedCode === room.invite_code ? (
+                                <Check className="size-3 text-green-500" />
+                            ) : (
+                                <Copy className="size-3" />
+                            )}
+                        </button>
+                    </div>
+                </CardContent>
+            </Card>
+        </Link>
     );
 }
 
